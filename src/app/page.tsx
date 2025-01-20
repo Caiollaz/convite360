@@ -95,7 +95,7 @@ export default function InvitationForm() {
           )}
 
           {formData.description && (
-            <div className="text-sm pt-8 text-gray-500">
+            <div className="text-sm break-words pt-8 text-gray-500">
               {formData.description}
             </div>
           )}
