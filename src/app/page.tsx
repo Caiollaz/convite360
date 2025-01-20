@@ -102,15 +102,12 @@ export default function InvitationForm() {
         </div>
       </div>
       <div
-        className="w-full p-6 text-center text-white"
+        className="w-full p-2 text-center text-white"
         style={{ backgroundColor: `${formData.color}80` }}
       >
         <p className="text-sm">
-          Enviado por {formData.name || "Nome do Organizador"}
+          Criado por {formData.name || "Nome do Organizador"}
         </p>
-        {formData.email && (
-          <p className="text-sm mt-1">Contato: {formData.email}</p>
-        )}
       </div>
     </div>
   );
