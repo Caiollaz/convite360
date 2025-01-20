@@ -340,7 +340,7 @@ export default function InvitationForm() {
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-background rounded-lg shadow-lg overflow-hidden max-w-2xl w-full mx-4">
             <div className="p-4 flex justify-between items-center border-b">
-              <h2 className="text-xl font-semibold">Visualização do Email</h2>
+              <h2 className="text-xl font-semibold">Visualização completa</h2>
               <Button
                 variant="ghost"
                 size="icon"
