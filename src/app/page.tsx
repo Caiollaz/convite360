@@ -14,6 +14,21 @@ import { Calendar, Maximize2, X, Ticket, MapPinned } from "lucide-react";
 import { useState } from "react";
 
 export default function InvitationForm() {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J"))
+      ) {
+        e.preventDefault();
+      }
+    };
+  
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+}, []);
+
+  const [showFullPreview, setShowFullPreview] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     startDate: "",
@@ -27,7 +42,6 @@ export default function InvitationForm() {
     email: "",
     phone: "",
   });
-  const [showFullPreview, setShowFullPreview] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -48,8 +62,7 @@ export default function InvitationForm() {
     setFormData((prev) => ({ ...prev, theme }));
   };
 
-  const selectedTheme =
-    themes.find((theme) => theme.id === formData.theme) || themes[0];
+  const selectedTheme = themes.find((theme) => theme.id === formData.theme) || themes[0];
 
   const PreviewContent = () => (
     <div className="w-full h-full bg-white rounded-lg">
@@ -113,7 +126,12 @@ export default function InvitationForm() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div
+      className="min-h-screen bg-background text-foreground"
+      onContextMenu={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
+      onSelectStart={(e) => e.preventDefault()}
+    >
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex items-center justify-between my-6">
           <div className="flex items-center gap-2">
