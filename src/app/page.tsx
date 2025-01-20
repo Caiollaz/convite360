@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { colors } from "@/interfaces/colors";
 import { themes } from "@/interfaces/themes";
-import { Calendar } from "lucide-react";
+import { Calendar, Maximize2, X, Ticket, MapPinned } from "lucide-react";
 import { useState } from "react";
 
 export default function InvitationForm() {
@@ -27,8 +27,7 @@ export default function InvitationForm() {
     email: "",
     phone: "",
   });
-
-  console.log(formData)
+  const [showFullPreview, setShowFullPreview] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -52,12 +51,75 @@ export default function InvitationForm() {
   const selectedTheme =
     themes.find((theme) => theme.id === formData.theme) || themes[0];
 
+  const PreviewContent = () => (
+    <div className="w-full h-full bg-white rounded-lg">
+      <div className="w-full flex justify-center items-center">
+        <img
+          src={selectedTheme.image || "/placeholder.svg"}
+          alt={selectedTheme.name}
+          className="h-full w-full object-cover"
+        />
+      </div>
+      <div className="max-w-2xl mx-auto px-6 py-8 bg-white text-gray-800">
+        <h1
+          className="text-3xl font-bold mb-8"
+          style={{ color: formData.color }}
+        >
+          {formData.title || "Título do Evento"}
+        </h1>
+        <div className="space-y-4">
+          {formData.startDate && (
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              <p className="text-sm">
+                {new Date(formData.startDate).toLocaleString("pt-BR", {
+                  dateStyle: "long",
+                  timeStyle: "short",
+                })}
+              </p>
+            </div>
+          )}
+
+          {formData.eventType && (
+            <div className="flex items-center gap-2">
+              <Ticket className="w-5 h-5" />
+              <p className="text-sm">Evento {formData.eventType}</p>
+            </div>
+          )}
+
+          {formData.location && (
+            <div className="flex items-center gap-2">
+              <MapPinned className="w-5 h-5" />
+              <p className="text-sm">Local: {formData.location}</p>
+            </div>
+          )}
+
+          {formData.description && (
+            <div className="text-sm pt-8 text-gray-500">
+              {formData.description}
+            </div>
+          )}
+        </div>
+      </div>
+      <div
+        className="w-full p-6 text-center text-white"
+        style={{ backgroundColor: `${formData.color}80` }}
+      >
+        <p className="text-sm">
+          Enviado por {formData.name || "Nome do Organizador"}
+        </p>
+        {formData.email && (
+          <p className="text-sm mt-1">Contato: {formData.email}</p>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-6xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between my-6">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🎉</span>
             <h1 className="font-leckerli text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
               Convite360
             </h1>
@@ -70,37 +132,16 @@ export default function InvitationForm() {
             <p className="text-muted-foreground mb-8">
               Crie um convite digital para o seu evento
             </p>
-            <div className="aspect-square bg-muted rounded-lg overflow-hidden relative">
-              <img
-                src={selectedTheme.image || "/placeholder.svg"}
-                alt={selectedTheme.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/60" />
-              <div className="absolute inset-0 p-8 flex flex-col justify-between text-white">
-                <h2 className="text-center text-3xl font-bold mb-2" style={{ color: formData.color }}>
-                  {formData.title}
-                </h2>
-                <div className="flex flex-col items-center">
-                  <p className="text-lg mb-2" style={{ color: formData.color }}>
-                    {formData.startDate
-                      ? new Date(formData.startDate).toLocaleString("pt-BR", {
-                          dateStyle: "long",
-                          timeStyle: "short",
-                        })
-                      : ""}
-                  </p>
-                  <p className="mb-2" style={{ color: formData.color }}>
-                    {formData.eventType}
-                  </p>
-                  <p className="mb-2" style={{ color: formData.color }}>
-                    {formData.location}
-                  </p>
-                  <p className="text-sm" style={{ color: formData.color }}>
-                    {formData.description}
-                  </p>
-                </div>
-              </div>
+            <div className="bg-muted rounded-lg overflow-hidden relative shadow-md">
+              <PreviewContent />
+              <Button
+                className="absolute bottom-4 right-4"
+                onClick={() => setShowFullPreview(true)}
+                aria-label="Visualizar em tela cheia"
+              >
+                <Maximize2 className="w-4 h-4 mr-2" />
+                Visualizar
+              </Button>
             </div>
           </div>
 
@@ -124,9 +165,9 @@ export default function InvitationForm() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="startDate">Início</Label>
+                      <Label htmlFor="startDate">Data do Evento</Label>
                       <Input
                         id="startDate"
                         name="startDate"
@@ -136,33 +177,23 @@ export default function InvitationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="endDate">Fim</Label>
-                      <Input
-                        id="endDate"
-                        name="endDate"
-                        type="datetime-local"
-                        value={formData.endDate}
-                        onChange={handleInputChange}
-                      />
+                      <Label>Tipo</Label>
+                      <RadioGroup
+                        value={formData.eventType}
+                        onValueChange={handleRadioChange}
+                        className="flex gap-4"
+                        style={{ marginTop: "1rem" }}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="presencial" id="presencial" />
+                          <Label htmlFor="presencial">Presencial</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="online" id="online" />
+                          <Label htmlFor="online">Online</Label>
+                        </div>
+                      </RadioGroup>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Tipo</Label>
-                    <RadioGroup
-                      value={formData.eventType}
-                      onValueChange={handleRadioChange}
-                      className="flex gap-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Presencial" id="presencial" />
-                        <Label htmlFor="presencial">Presencial</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Online" id="online" />
-                        <Label htmlFor="online">Online</Label>
-                      </div>
-                    </RadioGroup>
                   </div>
 
                   <div className="space-y-2">
@@ -255,7 +286,7 @@ export default function InvitationForm() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="email">E-mail</Label>
                       <Input
@@ -294,18 +325,6 @@ export default function InvitationForm() {
                       </a>
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="email-updates" />
-                    <Label htmlFor="email-updates" className="text-sm">
-                      Aceito receber atualizações e promoções por e-mail
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="sms-updates" />
-                    <Label htmlFor="sms-updates" className="text-sm">
-                      Aceito receber atualizações e promoções por SMS
-                    </Label>
-                  </div>
                 </div>
 
                 <Button className="w-full" size="lg">
@@ -316,6 +335,27 @@ export default function InvitationForm() {
           </Card>
         </div>
       </div>
+
+      {showFullPreview && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-background rounded-lg shadow-lg overflow-hidden max-w-2xl w-full mx-4">
+            <div className="p-4 flex justify-between items-center border-b">
+              <h2 className="text-xl font-semibold">Visualização do Email</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowFullPreview(false)}
+                aria-label="Fechar visualização"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="max-h-[80vh] overflow-y-auto">
+              <PreviewContent />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
