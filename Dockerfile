@@ -1,27 +1,29 @@
-# Use uma imagem oficial do Node.js como base
+# Use uma imagem base do Node.js com Alpine para um tamanho menor
 FROM node:18-alpine
 
-# Definir diretório de trabalho
+# Diretório de trabalho no container
 WORKDIR /app
 
-# Copiar arquivos necessários para instalar as dependências
+# Copiar apenas os arquivos essenciais para o build inicial
 COPY package.json package-lock.json ./
 
-# Instalar dependências (somente de produção)
-RUN npm ci --omit=dev && npm cache clean --force
+# Atualizar o NPM e instalar dependências
+RUN npm install -g npm@11.0.0 \
+    && npm ci --omit=dev || npm install --omit=dev \
+    && npm cache clean --force
 
-# Copiar o restante dos arquivos do projeto
+# Copiar todos os arquivos do projeto
 COPY . .
 
-# Configuração de variáveis de ambiente (ajuste conforme necessário)
+# Configurar variáveis de ambiente
 ENV PORT=3000
 ENV NODE_ENV=production
 
 # Build da aplicação (se necessário)
 RUN npm run build
 
-# Expõe a porta que o app usa
+# Expor a porta que será usada pela aplicação
 EXPOSE $PORT
 
-# Comando para iniciar o aplicativo
+# Comando para iniciar o servidor
 CMD ["npm", "start"]
