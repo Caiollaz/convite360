@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar, MapPinned, Maximize2, Ticket, X } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { v7 as uuidv7 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 export default function InvitationForm() {
   const { createMercadoPagoCheckout } = useMercadoPago();
@@ -81,7 +81,7 @@ export default function InvitationForm() {
   const onSubmit = async (data: FormData) => {
     try {
       await createMercadoPagoCheckout({
-        testeId: uuidv7(),
+        testeId: uuidv4(),
         userEmail: data.email,
       });
     } catch (error) {
