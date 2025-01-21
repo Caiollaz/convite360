@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { Payment } from "mercadopago";
 import mpClient from "@/lib/mercado-pago";
+import { Payment } from "mercadopago";
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   // Rota para lidar com pagamentos pendentes do Mercado Pago (i.e Pix)
@@ -20,9 +20,13 @@ export async function GET(request: Request) {
 
   if (paymentData.status === "approved" || paymentData.date_approved !== null) {
     // Pagamentos já foi realizado. redirecionamos para a página de sucesso
-    return NextResponse.redirect(new URL(`/obrigado?status=sucesso`, request.url));
+    return NextResponse.redirect(
+      new URL(`/obrigado?status=sucesso`, request.url)
+    );
   }
 
   // Pagamentos pendentes. redirecionamos para a página inicial
-  return NextResponse.redirect(new URL("/obrigado?status=pendente", request.url));
+  return NextResponse.redirect(
+    new URL("/obrigado?status=pendente", request.url)
+  );
 }

@@ -10,16 +10,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import useMercadoPago from "@/hooks/useMercadoPago";
 import { colors } from "@/interfaces/colors";
+import { FormData, formSchema } from "@/interfaces/schema";
 import { themes } from "@/interfaces/themes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar, MapPinned, Maximize2, Ticket, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { formSchema, FormData } from "@/interfaces/schema";
 
 export default function InvitationForm() {
-  const { createMercadoPagoCheckout } = useMercadoPago()
-  const [showFullPreview, setShowFullPreview] = useState(false)
+  const { createMercadoPagoCheckout } = useMercadoPago();
+  const [showFullPreview, setShowFullPreview] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     startDate: "",
@@ -33,7 +33,7 @@ export default function InvitationForm() {
     email: "",
     phone: "",
     terms: false,
-  })
+  });
 
   const {
     register,
@@ -43,7 +43,7 @@ export default function InvitationForm() {
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: formData,
-  })
+  });
 
   // useEffect(() => {
   //   const handleKeyDown = (e: KeyboardEvent) => {
@@ -56,37 +56,40 @@ export default function InvitationForm() {
   //   return () => window.removeEventListener("keydown", handleKeyDown)
   // }, [])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    setValue(name as keyof FormData, value)
-  }
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setValue(name as keyof FormData, value);
+  };
 
   const handleRadioChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, eventType: value }))
-    setValue("eventType", value)
-  }
+    setFormData((prev) => ({ ...prev, eventType: value }));
+    setValue("eventType", value);
+  };
 
   const handleColorChange = (color: string) => {
-    setFormData((prev) => ({ ...prev, color }))
-  }
+    setFormData((prev) => ({ ...prev, color }));
+  };
 
   const handleThemeChange = (theme: string) => {
-    setFormData((prev) => ({ ...prev, theme }))
-  }
+    setFormData((prev) => ({ ...prev, theme }));
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
       await createMercadoPagoCheckout({
         testeId: "123",
         userEmail: data.email,
-      })
+      });
     } catch (error) {
-      console.error("Erro ao processar pagamento:", error)
+      console.error("Erro ao processar pagamento:", error);
     }
-  }
+  };
 
-  const selectedTheme = themes.find((theme) => theme.id === formData.theme) || themes[0];
+  const selectedTheme =
+    themes.find((theme) => theme.id === formData.theme) || themes[0];
 
   const PreviewContent = () => (
     <div className="w-full h-full bg-white rounded-lg">
@@ -98,7 +101,10 @@ export default function InvitationForm() {
         />
       </div>
       <div className="max-w-2xl mx-auto px-6 py-8 bg-white text-gray-800">
-        <h1 className="text-3xl font-bold mb-8" style={{ color: formData.color }}>
+        <h1
+          className="text-3xl font-bold mb-8"
+          style={{ color: formData.color }}
+        >
           {formData.title || "Título do Evento"}
         </h1>
         <div className="space-y-4">
@@ -128,14 +134,23 @@ export default function InvitationForm() {
             </div>
           )}
 
-          {formData.description && <div className="text-sm break-words pt-8 text-gray-500">{formData.description}</div>}
+          {formData.description && (
+            <div className="text-sm break-words pt-8 text-gray-500">
+              {formData.description}
+            </div>
+          )}
         </div>
       </div>
-      <div className="w-full p-2 text-center text-white" style={{ backgroundColor: `${formData.color}80` }}>
-        <p className="text-sm">Criado por {formData.name || "Nome do Organizador"}</p>
+      <div
+        className="w-full p-2 text-center text-white"
+        style={{ backgroundColor: `${formData.color}80` }}
+      >
+        <p className="text-sm">
+          Criado por {formData.name || "Nome do Organizador"}
+        </p>
       </div>
     </div>
-  )
+  );
 
   return (
     <div
@@ -156,7 +171,9 @@ export default function InvitationForm() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
-            <p className="text-muted-foreground mb-8">Crie um convite digital para o seu evento</p>
+            <p className="text-muted-foreground mb-8">
+              Crie um convite digital para o seu evento
+            </p>
             <div className="bg-muted rounded-lg overflow-hidden relative shadow-md">
               <PreviewContent />
               <Button
@@ -189,7 +206,11 @@ export default function InvitationForm() {
                       onChange={handleInputChange}
                       className={errors.title ? "border-red-500" : ""}
                     />
-                    {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
+                    {errors.title && (
+                      <p className="text-sm text-red-500">
+                        {errors.title.message}
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -203,7 +224,11 @@ export default function InvitationForm() {
                         onChange={handleInputChange}
                         className={errors.startDate ? "border-red-500" : ""}
                       />
-                      {errors.startDate && <p className="text-sm text-red-500">{errors.startDate.message}</p>}
+                      {errors.startDate && (
+                        <p className="text-sm text-red-500">
+                          {errors.startDate.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label>Tipo</Label>
@@ -222,7 +247,11 @@ export default function InvitationForm() {
                           <Label htmlFor="online">Online</Label>
                         </div>
                       </RadioGroup>
-                      {errors.eventType && <p className="text-sm text-red-500">{errors.eventType.message}</p>}
+                      {errors.eventType && (
+                        <p className="text-sm text-red-500">
+                          {errors.eventType.message}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -236,7 +265,11 @@ export default function InvitationForm() {
                       onChange={handleInputChange}
                       className={errors.location ? "border-red-500" : ""}
                     />
-                    {errors.location && <p className="text-sm text-red-500">{errors.location.message}</p>}
+                    {errors.location && (
+                      <p className="text-sm text-red-500">
+                        {errors.location.message}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -245,11 +278,17 @@ export default function InvitationForm() {
                       id="description"
                       {...register("description")}
                       placeholder="Escreva sobre os detalhes do evento"
-                      className={`min-h-[100px] ${errors.description ? "border-red-500" : ""}`}
+                      className={`min-h-[100px] ${
+                        errors.description ? "border-red-500" : ""
+                      }`}
                       value={formData.description}
                       onChange={handleInputChange}
                     />
-                    {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
+                    {errors.description && (
+                      <p className="text-sm text-red-500">
+                        {errors.description.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -262,8 +301,11 @@ export default function InvitationForm() {
                       {colors.map((color) => (
                         <button
                           key={color}
-                          className={`w-8 h-8 rounded-full transition-transform ${formData.color === color ? "scale-110 ring-2 ring-primary" : ""
-                            }`}
+                          className={`w-8 h-8 rounded-full transition-transform ${
+                            formData.color === color
+                              ? "scale-110 ring-2 ring-primary"
+                              : ""
+                          }`}
                           style={{ backgroundColor: color }}
                           onClick={() => handleColorChange(color)}
                           type="button"
@@ -278,8 +320,11 @@ export default function InvitationForm() {
                       {themes.map((theme) => (
                         <button
                           key={theme.id}
-                          className={`aspect-video relative rounded-lg overflow-hidden transition-all ${formData.theme === theme.id ? "ring-2 ring-primary scale-95" : "hover:scale-95"
-                            }`}
+                          className={`aspect-video relative rounded-lg overflow-hidden transition-all ${
+                            formData.theme === theme.id
+                              ? "ring-2 ring-primary scale-95"
+                              : "hover:scale-95"
+                          }`}
                           onClick={() => handleThemeChange(theme.id)}
                           type="button"
                         >
@@ -311,7 +356,11 @@ export default function InvitationForm() {
                       onChange={handleInputChange}
                       className={errors.name ? "border-red-500" : ""}
                     />
-                    {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+                    {errors.name && (
+                      <p className="text-sm text-red-500">
+                        {errors.name.message}
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -326,7 +375,11 @@ export default function InvitationForm() {
                         onChange={handleInputChange}
                         className={errors.email ? "border-red-500" : ""}
                       />
-                      {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+                      {errors.email && (
+                        <p className="text-sm text-red-500">
+                          {errors.email.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Telefone</Label>
@@ -338,7 +391,11 @@ export default function InvitationForm() {
                         onChange={handleInputChange}
                         className={errors.phone ? "border-red-500" : ""}
                       />
-                      {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+                      {errors.phone && (
+                        <p className="text-sm text-red-500">
+                          {errors.phone.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -349,8 +406,11 @@ export default function InvitationForm() {
                       id="terms"
                       checked={formData.terms}
                       onCheckedChange={(checked) => {
-                        setFormData((prev) => ({ ...prev, terms: checked === true }))
-                        setValue("terms", checked === true)
+                        setFormData((prev) => ({
+                          ...prev,
+                          terms: checked === true,
+                        }));
+                        setValue("terms", checked === true);
                       }}
                     />
                     <Label htmlFor="terms" className="text-sm">
@@ -364,7 +424,11 @@ export default function InvitationForm() {
                       </a>
                     </Label>
                   </div>
-                  {errors.terms && <p className="text-sm text-red-500">{errors.terms.message}</p>}
+                  {errors.terms && (
+                    <p className="text-sm text-red-500">
+                      {errors.terms.message}
+                    </p>
+                  )}
                 </div>
 
                 <Button type="submit" className="w-full" size="lg">
@@ -397,5 +461,5 @@ export default function InvitationForm() {
         </div>
       )}
     </div>
-  )
+  );
 }

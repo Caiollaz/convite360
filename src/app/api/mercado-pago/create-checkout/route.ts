@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Preference } from "mercadopago";
 import mpClient from "@/lib/mercado-pago";
+import { Preference } from "mercadopago";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const { testeId, userEmail } = await req.json();
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
             description: "Template de um convite basico",
             title: "Convite Basico",
             quantity: 1,
-            unit_price: 6.90,
+            unit_price: 6.9,
             currency_id: "BRL",
             category_id: "category", // Recomendado inserir, mesmo que não tenha categoria - Aumenta a pontuação da sua integração com o Mercado Pago
           },

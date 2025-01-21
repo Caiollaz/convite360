@@ -1,6 +1,6 @@
+import crypto from "crypto";
 import { MercadoPagoConfig } from "mercadopago";
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 
 // Instância do cliente Mercado Pago
 const mpClient = new MercadoPagoConfig({
