@@ -5,11 +5,9 @@ import { PagePending } from "@/components/page-pending";
 import { PageSuccess } from "@/components/page-success";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 export default function ThankYouPage() {
-  const searchParams = useSearchParams();
-  const status = searchParams.get("status");
-
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="w-full p-4 flex justify-between items-center">
@@ -20,15 +18,9 @@ export default function ThankYouPage() {
       </header>
 
       <main className="flex-grow flex items-center justify-center p-4">
-        {status === "sucesso" ? (
-          <PageSuccess />
-        ) : status === "falha" ? (
-          <PageFailure />
-        ) : status === "pendente" ? (
-          <PagePending />
-        ) : (
-          <></>
-        )}
+        <Suspense fallback={<div>Carregando...</div>}>
+          <StatusContent />
+        </Suspense>
       </main>
 
       <footer className="w-full p-4 text-center text-sm text-muted-foreground">
@@ -36,4 +28,19 @@ export default function ThankYouPage() {
       </footer>
     </div>
   );
+}
+
+function StatusContent() {
+  const searchParams = useSearchParams();
+  const status = searchParams.get("status");
+
+  if (status === "sucesso") {
+    return <PageSuccess />;
+  } else if (status === "falha") {
+    return <PageFailure />;
+  } else if (status === "pendente") {
+    return <PagePending />;
+  }
+
+  return null;
 }
