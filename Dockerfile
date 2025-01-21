@@ -1,29 +1,28 @@
-# Use uma imagem base do Node.js com Alpine para um tamanho menor
-FROM node:18-alpine
+# Imagem base
+FROM node:18
 
-# Diretório de trabalho no container
+# Diretório de trabalho
 WORKDIR /app
 
-# Copiar apenas os arquivos essenciais para o build inicial
-COPY package.json package-lock.json ./
+# Definir variáveis de ambiente
+ENV MERCADO_PAGO_ACCESS_TOKEN="APP_USR-5897040864811365-012022-806610eb5b276627fb9c111e2e40790c-296706365"
+ENV NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY="APP_USR-dac12363-d857-4957-8de2-4c6b97ca352e"
+ENV MERCADO_PAGO_WEBHOOK_SECRET="ad2532f84589e980228597a1a5c042924016b0f14b98e1dd9dd7bb5d2d739ace"
 
-# Atualizar o NPM e instalar dependências
-RUN npm install -g npm@11.0.0 \
-    && npm ci --omit=dev || npm install --omit=dev \
-    && npm cache clean --force
+# Copiar o package.json e package-lock.json para a imagem
+COPY package*.json ./
 
-# Copiar todos os arquivos do projeto
+# Instalar as dependências
+RUN npm ci --omit=dev
+
+# Copiar o restante dos arquivos do projeto
 COPY . .
 
-# Configurar variáveis de ambiente
-ENV PORT=3000
-ENV NODE_ENV=production
-
-# Build da aplicação (se necessário)
+# Rodar o build da aplicação
 RUN npm run build
 
 # Expor a porta que será usada pela aplicação
-EXPOSE $PORT
+EXPOSE 3000
 
-# Comando para iniciar o servidor
+# Rodar o Next.js em produção
 CMD ["npm", "start"]
