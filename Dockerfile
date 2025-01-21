@@ -4,15 +4,13 @@ FROM node:18-alpine
 # Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar apenas os arquivos essenciais para instalação de dependências
+# Copiar arquivos necessários para instalar as dependências
 COPY package.json package-lock.json ./
 
-# Configurar cache para dependências do NPM (para builds mais rápidos)
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev \
-    && npm cache clean --force
+# Instalar dependências (somente de produção)
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copiar o restante dos arquivos do projeto para o contêiner
+# Copiar o restante dos arquivos do projeto
 COPY . .
 
 # Configuração de variáveis de ambiente (ajuste conforme necessário)
