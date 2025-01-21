@@ -8,27 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import useMercadoPago from "@/hooks/useMercadoPago";
 import { colors } from "@/interfaces/colors";
 import { themes } from "@/interfaces/themes";
-import { Calendar, Maximize2, X, Ticket, MapPinned } from "lucide-react";
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Calendar, MapPinned, Maximize2, Ticket, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { formSchema, FormData } from "@/interfaces/schema";
 
 export default function InvitationForm() {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.key === "F12" ||
-        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J"))
-      ) {
-        e.preventDefault();
-      }
-    };
-  
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-}, []);
-
-  const [showFullPreview, setShowFullPreview] = useState(false);
+  const { createMercadoPagoCheckout } = useMercadoPago()
+  const [showFullPreview, setShowFullPreview] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
     startDate: "",
@@ -41,26 +32,59 @@ export default function InvitationForm() {
     name: "",
     email: "",
     phone: "",
-  });
+    terms: false,
+  })
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: formData,
+  })
+
+  // useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J"))) {
+  //       e.preventDefault()
+  //     }
+  //   }
+
+  //   window.addEventListener("keydown", handleKeyDown)
+  //   return () => window.removeEventListener("keydown", handleKeyDown)
+  // }, [])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setValue(name as keyof FormData, value)
+  }
 
   const handleRadioChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, eventType: value }));
-  };
+    setFormData((prev) => ({ ...prev, eventType: value }))
+    setValue("eventType", value)
+  }
 
   const handleColorChange = (color: string) => {
-    setFormData((prev) => ({ ...prev, color }));
-  };
+    setFormData((prev) => ({ ...prev, color }))
+  }
 
   const handleThemeChange = (theme: string) => {
-    setFormData((prev) => ({ ...prev, theme }));
-  };
+    setFormData((prev) => ({ ...prev, theme }))
+  }
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      await createMercadoPagoCheckout({
+        testeId: "123",
+        userEmail: data.email,
+      })
+    } catch (error) {
+      console.error("Erro ao processar pagamento:", error)
+    }
+  }
 
   const selectedTheme = themes.find((theme) => theme.id === formData.theme) || themes[0];
 
@@ -74,10 +98,7 @@ export default function InvitationForm() {
         />
       </div>
       <div className="max-w-2xl mx-auto px-6 py-8 bg-white text-gray-800">
-        <h1
-          className="text-3xl font-bold mb-8"
-          style={{ color: formData.color }}
-        >
+        <h1 className="text-3xl font-bold mb-8" style={{ color: formData.color }}>
           {formData.title || "Título do Evento"}
         </h1>
         <div className="space-y-4">
@@ -107,30 +128,21 @@ export default function InvitationForm() {
             </div>
           )}
 
-          {formData.description && (
-            <div className="text-sm break-words pt-8 text-gray-500">
-              {formData.description}
-            </div>
-          )}
+          {formData.description && <div className="text-sm break-words pt-8 text-gray-500">{formData.description}</div>}
         </div>
       </div>
-      <div
-        className="w-full p-2 text-center text-white"
-        style={{ backgroundColor: `${formData.color}80` }}
-      >
-        <p className="text-sm">
-          Criado por {formData.name || "Nome do Organizador"}
-        </p>
+      <div className="w-full p-2 text-center text-white" style={{ backgroundColor: `${formData.color}80` }}>
+        <p className="text-sm">Criado por {formData.name || "Nome do Organizador"}</p>
       </div>
     </div>
-  );
+  )
 
   return (
     <div
       className="min-h-screen bg-background text-foreground"
       onContextMenu={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}
-      onSelectStart={(e) => e.preventDefault()}
+      onSelect={(e) => e.preventDefault()}
     >
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex items-center justify-between my-6">
@@ -144,9 +156,7 @@ export default function InvitationForm() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
-            <p className="text-muted-foreground mb-8">
-              Crie um convite digital para o seu evento
-            </p>
+            <p className="text-muted-foreground mb-8">Crie um convite digital para o seu evento</p>
             <div className="bg-muted rounded-lg overflow-hidden relative shadow-md">
               <PreviewContent />
               <Button
@@ -162,7 +172,7 @@ export default function InvitationForm() {
 
           <Card>
             <CardContent className="p-6">
-              <form className="space-y-8">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
@@ -173,11 +183,13 @@ export default function InvitationForm() {
                     <Label htmlFor="title">Título</Label>
                     <Input
                       id="title"
-                      name="title"
+                      {...register("title")}
                       placeholder="Nome do evento"
                       value={formData.title}
                       onChange={handleInputChange}
+                      className={errors.title ? "border-red-500" : ""}
                     />
+                    {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -185,11 +197,13 @@ export default function InvitationForm() {
                       <Label htmlFor="startDate">Data do Evento</Label>
                       <Input
                         id="startDate"
-                        name="startDate"
+                        {...register("startDate")}
                         type="datetime-local"
                         value={formData.startDate}
                         onChange={handleInputChange}
+                        className={errors.startDate ? "border-red-500" : ""}
                       />
+                      {errors.startDate && <p className="text-sm text-red-500">{errors.startDate.message}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label>Tipo</Label>
@@ -208,6 +222,7 @@ export default function InvitationForm() {
                           <Label htmlFor="online">Online</Label>
                         </div>
                       </RadioGroup>
+                      {errors.eventType && <p className="text-sm text-red-500">{errors.eventType.message}</p>}
                     </div>
                   </div>
 
@@ -215,23 +230,26 @@ export default function InvitationForm() {
                     <Label htmlFor="location">Local</Label>
                     <Input
                       id="location"
-                      name="location"
+                      {...register("location")}
                       placeholder="Link ou endereço"
                       value={formData.location}
                       onChange={handleInputChange}
+                      className={errors.location ? "border-red-500" : ""}
                     />
+                    {errors.location && <p className="text-sm text-red-500">{errors.location.message}</p>}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="description">Descrição</Label>
                     <Textarea
                       id="description"
-                      name="description"
+                      {...register("description")}
                       placeholder="Escreva sobre os detalhes do evento"
-                      className="min-h-[100px]"
+                      className={`min-h-[100px] ${errors.description ? "border-red-500" : ""}`}
                       value={formData.description}
                       onChange={handleInputChange}
                     />
+                    {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
                   </div>
                 </div>
 
@@ -244,11 +262,8 @@ export default function InvitationForm() {
                       {colors.map((color) => (
                         <button
                           key={color}
-                          className={`w-8 h-8 rounded-full transition-transform ${
-                            formData.color === color
-                              ? "scale-110 ring-2 ring-primary"
-                              : ""
-                          }`}
+                          className={`w-8 h-8 rounded-full transition-transform ${formData.color === color ? "scale-110 ring-2 ring-primary" : ""
+                            }`}
                           style={{ backgroundColor: color }}
                           onClick={() => handleColorChange(color)}
                           type="button"
@@ -263,11 +278,8 @@ export default function InvitationForm() {
                       {themes.map((theme) => (
                         <button
                           key={theme.id}
-                          className={`aspect-video relative rounded-lg overflow-hidden transition-all ${
-                            formData.theme === theme.id
-                              ? "ring-2 ring-primary scale-95"
-                              : "hover:scale-95"
-                          }`}
+                          className={`aspect-video relative rounded-lg overflow-hidden transition-all ${formData.theme === theme.id ? "ring-2 ring-primary scale-95" : "hover:scale-95"
+                            }`}
                           onClick={() => handleThemeChange(theme.id)}
                           type="button"
                         >
@@ -293,12 +305,13 @@ export default function InvitationForm() {
                     <Label htmlFor="name">Nome</Label>
                     <Input
                       id="name"
-                      name="name"
+                      {...register("name")}
                       placeholder="Nome completo"
-                      required
                       value={formData.name}
                       onChange={handleInputChange}
+                      className={errors.name ? "border-red-500" : ""}
                     />
+                    {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -306,29 +319,40 @@ export default function InvitationForm() {
                       <Label htmlFor="email">E-mail</Label>
                       <Input
                         id="email"
-                        name="email"
+                        {...register("email")}
                         type="email"
                         placeholder="exemplo@email.com"
                         value={formData.email}
                         onChange={handleInputChange}
+                        className={errors.email ? "border-red-500" : ""}
                       />
+                      {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Telefone</Label>
                       <Input
                         id="phone"
-                        name="phone"
+                        {...register("phone")}
                         placeholder="(99) 99999-9999"
                         value={formData.phone}
                         onChange={handleInputChange}
+                        className={errors.phone ? "border-red-500" : ""}
                       />
+                      {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="terms" />
+                    <Checkbox
+                      id="terms"
+                      checked={formData.terms}
+                      onCheckedChange={(checked) => {
+                        setFormData((prev) => ({ ...prev, terms: checked === true }))
+                        setValue("terms", checked === true)
+                      }}
+                    />
                     <Label htmlFor="terms" className="text-sm">
                       Li e concordo com os{" "}
                       <a href="#" className="text-primary hover:underline">
@@ -340,9 +364,10 @@ export default function InvitationForm() {
                       </a>
                     </Label>
                   </div>
+                  {errors.terms && <p className="text-sm text-red-500">{errors.terms.message}</p>}
                 </div>
 
-                <Button className="w-full" size="lg">
+                <Button type="submit" className="w-full" size="lg">
                   Gerar convite
                 </Button>
               </form>
@@ -372,5 +397,5 @@ export default function InvitationForm() {
         </div>
       )}
     </div>
-  );
+  )
 }
