@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageSuccess } from "@/components/page-success";
 import { PageFailure } from "@/components/page-failure";
@@ -10,7 +10,12 @@ import Link from "next/link";
 
 export default function ThankYouPage() {
   const searchParams = useSearchParams();
-  const status = searchParams.get("status");
+  const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    const paramStatus = searchParams.get("status");
+    setStatus(paramStatus);
+  }, [searchParams]);
 
   const renderThankYouComponent = () => {
     switch (status) {
@@ -21,7 +26,7 @@ export default function ThankYouPage() {
       case "pendente":
         return <PagePending />;
       default:
-        return <PagePending />;
+        return <></>;
     }
   };
 
@@ -37,9 +42,7 @@ export default function ThankYouPage() {
         <ThemeToggle />
       </header>
       <main className="flex-grow flex items-center justify-center p-4 relative z-10">
-        <Suspense fallback={<div>Loading...</div>}>
-          {renderThankYouComponent()}
-        </Suspense>
+        {renderThankYouComponent()}
       </main>
       <footer className="w-full p-6 text-center text-sm text-muted-foreground relative z-10 border-t border-border">
         © 2024 Convite360. Todos os direitos reservados.
