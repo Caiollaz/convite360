@@ -21,7 +21,7 @@ export default function ThankYouPage() {
       case "pendente":
         return <PagePending />;
       default:
-        return <></>;
+        return <PagePending />;
     }
   };
 
