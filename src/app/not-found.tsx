@@ -7,9 +7,11 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="w-full p-4 flex justify-between items-center">
-        <h1 className="font-leckerli text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-          Convite360
-        </h1>
+        <Link href={"/"}>
+          <h1 className="font-leckerli text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+            Convite360
+          </h1>
+        </Link>
         <ThemeToggle />
       </header>
 
