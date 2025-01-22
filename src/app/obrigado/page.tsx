@@ -1,12 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageSuccess } from "@/components/page-success";
 import { PageFailure } from "@/components/page-failure";
 import { PagePending } from "@/components/page-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
-import { PartyPopper } from "lucide-react";
 
 export default function ThankYouPage() {
   const searchParams = useSearchParams();
@@ -37,7 +37,9 @@ export default function ThankYouPage() {
         <ThemeToggle />
       </header>
       <main className="flex-grow flex items-center justify-center p-4 relative z-10">
-        {renderThankYouComponent()}
+        <Suspense fallback={<div>Loading...</div>}>
+          {renderThankYouComponent()}
+        </Suspense>
       </main>
       <footer className="w-full p-6 text-center text-sm text-muted-foreground relative z-10 border-t border-border">
         © 2024 Convite360. Todos os direitos reservados.
