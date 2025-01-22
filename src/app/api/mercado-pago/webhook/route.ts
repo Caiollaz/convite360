@@ -1,5 +1,3 @@
-// app/api/mercadopago-webhook/route.js
-
 import mpClient, { verifyMercadoPagoSignature } from "@/lib/mercado-pago";
 import { handleMercadoPagoPayment } from "@/server/mercado-pago/handle-payment";
 import { Payment } from "mercadopago";

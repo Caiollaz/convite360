@@ -6,12 +6,14 @@ export async function GET(request: Request) {
   // Rota para lidar com pagamentos pendentes do Mercado Pago (i.e Pix)
   // Quando o cliente clica no botão 'Voltar para o site' no Checkout depois de pagar (ou não) o Pix
   const { searchParams } = new URL(request.url);
+  
   // Pegamos o ID do pagamento no Mercado Pago
   const paymentId = searchParams.get("payment_id");
-  // Pegamos o ID do pagamento do nosso sistema
-  const testeId = searchParams.get("external_reference");
 
-  if (!paymentId || !testeId) {
+  // Pegamos o ID do pagamento do nosso sistema
+  const id = searchParams.get("external_reference");
+
+  if (!paymentId || !id) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 

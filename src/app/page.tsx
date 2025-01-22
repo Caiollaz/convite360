@@ -81,8 +81,10 @@ export default function InvitationForm() {
   const onSubmit = async (data: FormData) => {
     try {
       await createMercadoPagoCheckout({
-        testeId: uuidv4(),
-        userEmail: data.email,
+        id: uuidv4(),
+        email: data.email,
+        name: data.name,
+        phoneNumber: data.phone,
       });
     } catch (error) {
       console.error("Erro ao processar pagamento:", error);

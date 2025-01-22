@@ -3,24 +3,25 @@ import { Preference } from "mercadopago";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { testeId, userEmail } = await req.json();
+  const { id, email, name, phoneNumber } = await req.json();
 
   try {
     const preference = new Preference(mpClient);
 
     const createdPreference = await preference.create({
       body: {
-        external_reference: testeId, // IMPORTANTE: Isso aumenta a pontuação da sua integração com o Mercado Pago - É o id da compra no nosso sistema
+        external_reference: id, // IMPORTANTE: Isso aumenta a pontuação da sua integração com o Mercado Pago - É o id da compra no nosso sistema
         metadata: {
-          testeId, // O Mercado Pago converte para snake_case, ou seja, testeId vai virar teste_id
-          userEmail: userEmail,
+          id,
+          email: email, // O Mercado Pago converte para snake_case, ou seja, email vai virar email
         },
-        ...(userEmail && {
-          payer: {
-            email: userEmail,
+        payer: {
+          email: email,
+          name: name,
+          phone: {
+            number: phoneNumber,
           },
-        }),
-
+        },
         items: [
           {
             id: "1",
@@ -34,22 +35,8 @@ export async function POST(req: NextRequest) {
         ],
         payment_methods: {
           // Comente para desativar métodos de pagamento
-          excluded_payment_methods: [
-            {
-              id: "bolbradesco",
-            },
-            {
-              id: "pec",
-            },
-          ],
-          excluded_payment_types: [
-            {
-              id: "debit_card",
-            },
-            {
-              id: "credit_card",
-            },
-          ],
+          excluded_payment_methods: [{ id: "bolbradesco" }, { id: "pec" }],
+          excluded_payment_types: [{ id: "debit_card" }, { id: "credit_card" }],
           installments: 12, // Número máximo de parcelas permitidas - calculo feito automaticamente
         },
         auto_return: "approved",
@@ -62,7 +49,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!createdPreference.id) {
-      throw new Error("No preferenceID");
+      throw new Error("Erro: preferenceID não foi gerado.");
     }
 
     return NextResponse.json({
@@ -70,7 +57,10 @@ export async function POST(req: NextRequest) {
       initPoint: createdPreference.init_point,
     });
   } catch (err) {
-    console.error(err);
-    return NextResponse.error();
+    console.error("Erro ao criar a preferência no Mercado Pago:", err);
+    return NextResponse.json(
+      { error: "Erro ao processar o pagamento" },
+      { status: 500 }
+    );
   }
 }
