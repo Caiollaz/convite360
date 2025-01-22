@@ -163,6 +163,7 @@ export default function InvitationForm() {
       onDragStart={(e) => e.preventDefault()}
       onSelect={(e) => e.preventDefault()}
     >
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-transparent to-transparent pointer-events-none" />
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex items-center justify-between my-6">
           <div className="flex items-center gap-2">
@@ -175,7 +176,7 @@ export default function InvitationForm() {
           <ThemeToggle />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <p className="text-muted-foreground mb-8">
               Crie um convite digital para o seu evento
@@ -466,6 +467,10 @@ export default function InvitationForm() {
           </div>
         </div>
       )}
+
+      <footer className="w-full p-6 text-center text-sm text-muted-foreground relative z-10 border-t border-border">
+        © 2024 Convite360. Todos os direitos reservados.
+      </footer>
     </div>
   );
 }
