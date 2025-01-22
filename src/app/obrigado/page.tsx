@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageSuccess } from "@/components/page-success";
 import { PageFailure } from "@/components/page-failure";
@@ -8,7 +8,9 @@ import { PagePending } from "@/components/page-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 
-export default function ThankYouPage() {
+const SuspenseFallback = () => <div>Loading...</div>;
+
+const ThankYouPageContent = () => {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<string | null>(null);
 
@@ -30,6 +32,10 @@ export default function ThankYouPage() {
     }
   };
 
+  if (status === null) {
+    return <SuspenseFallback />;
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-transparent to-transparent pointer-events-none" />
@@ -48,5 +54,13 @@ export default function ThankYouPage() {
         © 2024 Convite360. Todos os direitos reservados.
       </footer>
     </div>
+  );
+};
+
+export default function ThankYouPage() {
+  return (
+    <Suspense fallback={<SuspenseFallback />}>
+      <ThankYouPageContent />
+    </Suspense>
   );
 }
