@@ -114,10 +114,6 @@ export async function sendConfirmationEmail(
   invitationId: string
 ) {
   try {
-    console.log(
-      `Starting email send process for invitation ${invitationId} to ${email}`
-    );
-
     const invitation = await prisma.invitation.findUnique({
       where: { id: invitationId },
     });
@@ -126,26 +122,54 @@ export async function sendConfirmationEmail(
       throw new Error("Invitation not found");
     }
 
-    console.log("Generating PNG and image...");
     const { png, image } = await generatePNGAndImage(invitationId);
-    console.log("PNG and image generated successfully");
 
     const mailOptions = {
       from: process.env.EMAIL_FROM,
       to: email,
-      subject: "Seu convite está pronto! ",
+      subject: "✨ Seu convite está pronto! ",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Seu convite está pronto!</h1>
-          <p>Olá! Seu convite para "${invitation.title}" foi criado com sucesso.</p>
-          <div style="margin: 20px 0;">
-            <img src="${image}" alt="Convite" style="max-width: 100%; height: auto;" />
-          </div>
-          <p>Você pode visualizar e compartilhar seu convite através do link:</p>
-          <a href="${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}" style="color: #0070f3; text-decoration: none;">
-            ${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}
-          </a>
-        </div>
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Seu convite está pronto!</title>
+          </head>
+          <body style="margin: 0; padding: 0; background-color: #f9f9f9; font-family: Arial, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="height: 6px; background-color: ${invitation.color};"></div>
+              <div style="padding: 40px 30px;">
+                <h1 style="color: #333; font-size: 28px; margin: 0 0 20px 0; text-align: center;">✨ Seu convite está pronto!</h1>
+                <p style="color: #666; font-size: 16px; line-height: 1.5; margin: 0 0 25px 0; text-align: center;">
+                  Olá! Seu convite para <strong style="color: ${invitation.color};">${invitation.title}</strong> foi criado com sucesso.
+                </p>
+                <div style="background-color: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                  <p style="color: #888; font-size: 14px; margin: 0 0 15px 0; text-align: center; text-transform: uppercase; letter-spacing: 1px;">
+                    Prévia do seu convite
+                  </p>
+                  <div style="text-align: center;">
+                    <img src="${image}" alt="Convite" style="max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);" />
+                  </div>
+                </div>
+                <div style="text-align: center; margin-bottom: 35px;">
+                  <p style="color: #666; font-size: 16px; margin: 0 0 20px 0;">
+                    Visualize e compartilhe seu convite através do link:
+                  </p>
+                  <a href="${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}/preview" 
+                     style="display: inline-block; background-color: ${invitation.color}; color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 500; font-size: 16px;">
+                    Ver meu convite
+                  </a>
+                </div>
+                <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+                  <p style="color: #888; font-size: 14px; margin: 0;">
+                    Este é um email automático, por favor não responda.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
       `,
       attachments: [
         {
@@ -156,33 +180,19 @@ export async function sendConfirmationEmail(
       ],
     };
 
-    console.log("Sending email...");
-    console.log("Using SMTP settings:", {
-      host: process.env.EMAIL_HOST,
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-      },
-    });
-
-    // Use promise-based sendMail
     const info = await new Promise((resolve, reject) => {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          console.error("Error sending email:", error);
           reject(error);
         } else {
-          console.log("Email sent successfully:", info.response);
           resolve(info);
         }
       });
     });
 
-    console.log("Email sent successfully");
     return info;
-  } catch (error) {
-    console.error("Error in sendConfirmationEmail:", error);
+  }
+  catch (error) {
     throw error;
   }
 }
