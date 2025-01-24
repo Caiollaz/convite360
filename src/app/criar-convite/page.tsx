@@ -39,6 +39,9 @@ export default function InvitationForm() {
     terms: false,
   });
 
+  const [selectedTheme, setSelectedTheme] = useState(themes[0]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -78,12 +81,20 @@ export default function InvitationForm() {
   };
 
   const handleThemeChange = (theme: string) => {
+    const newTheme = themes.find((t) => t.id === theme) || themes[0];
+    setSelectedTheme(newTheme);
     setFormData((prev) => ({ ...prev, theme }));
   };
 
   const onSubmit = async (data: FormData) => {
     try {
+      setIsLoading(true);
       const invitationId = uuidv4();
+
+      if (!selectedTheme) {
+        toast.error("Por favor, selecione um tema");
+        return;
+      }
 
       await createInvitation({
         ...data,
@@ -103,11 +114,10 @@ export default function InvitationForm() {
     } catch (error) {
       console.error(error);
       toast.error("Erro ao criar convite. Por favor, tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const selectedTheme =
-    themes.find((theme) => theme.id === formData.theme) || themes[0];
 
   const PreviewContent = () => (
     <div className="w-full h-full bg-white rounded-lg">
@@ -452,8 +462,19 @@ export default function InvitationForm() {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full" size="lg">
-                  Gerar convite
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-background border-r-foreground" />
+                      Gerando convite...
+                    </>
+                  ) : (
+                    "Gerar convite"
+                  )}
                 </Button>
               </form>
             </CardContent>
