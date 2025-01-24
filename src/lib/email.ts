@@ -1,7 +1,6 @@
 import "server-only";
 import { createTransport } from "nodemailer";
 import handlebars from "handlebars";
-import puppeteer from "puppeteer";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { prisma } from "./prisma";
@@ -16,6 +15,39 @@ const transporter = createTransport({
   },
 });
 
+export async function generateInvitationImage(
+  invitationId: string
+): Promise<string> {
+  const invitation = await prisma.invitation.findUnique({
+    where: { id: invitationId },
+  });
+
+  if (!invitation) {
+    throw new Error("Invitation not found");
+  }
+
+  const params = new URLSearchParams({
+    title: invitation.title,
+    date: invitation.startDate.toLocaleDateString("pt-BR"),
+    location: invitation.location,
+    description: invitation.description,
+    themeImage: invitation.themeImage ?? "",
+    color: invitation.color,
+  });
+
+  const imageUrl = `${
+    process.env.NEXT_PUBLIC_BASE_URL
+  }/api/og?${params.toString()}`;
+
+  // Fetch the image as a buffer
+  const response = await fetch(imageUrl);
+  if (!response.ok) {
+    throw new Error("Failed to generate invitation image");
+  }
+
+  return imageUrl;
+}
+
 export async function generatePDFAndImage(invitationId: string) {
   const invitation = await prisma.invitation.findUnique({
     where: { id: invitationId },
@@ -25,38 +57,44 @@ export async function generatePDFAndImage(invitationId: string) {
     throw new Error("Invitation not found");
   }
 
-  const browser = await puppeteer.launch({
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--single-process'
-    ],
-    headless: true,
-    executablePath: process.env.NODE_ENV === 'production'
-      ? '/usr/bin/chromium'  // Path do Chrome na Vercel
-      : puppeteer.executablePath(), // Use local Chrome in development
-  });
-  
-  const page = await browser.newPage();
-  
-  await page.goto(`${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}/preview`, {
-    waitUntil: "networkidle0",
+  const imageUrl = await generateInvitationImage(invitationId);
+
+  const templatePath = join(
+    process.cwd(),
+    "src/lib/email-templates/confirmation.hbs"
+  );
+  const template = handlebars.compile(readFileSync(templatePath, "utf8"));
+
+  const templateData = {
+    name: invitation.name,
+    eventTitle: invitation.title,
+    eventDate: new Date(invitation.startDate).toLocaleString("pt-BR", {
+      dateStyle: "long",
+      timeStyle: "short",
+    }),
+    location: invitation.location,
+    eventType: invitation.eventType,
+    invitationUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}`,
+    buttonColor: invitation.color,
+  };
+
+  const html = template(templateData);
+
+  const pdf = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pdf`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ html }),
   });
 
-  const pdf = await page.pdf({
-    format: "A4",
-    printBackground: true,
-  });
+  if (!pdf.ok) {
+    throw new Error("Failed to generate PDF");
+  }
 
-  const image = await page.screenshot({
-    type: "png",
-    fullPage: true,
-  });
+  const pdfBuffer = await pdf.arrayBuffer();
 
-  await browser.close();
-
-  return { pdf, image };
+  return { pdf: Buffer.from(pdfBuffer), image: imageUrl };
 }
 
 export async function sendConfirmationEmail(
@@ -73,46 +111,37 @@ export async function sendConfirmationEmail(
 
   const { pdf, image } = await generatePDFAndImage(invitationId);
 
-  const templatePath = join(process.cwd(), "src/lib/email-templates/confirmation.hbs");
-  const template = handlebars.compile(readFileSync(templatePath, "utf8"));
-
-  const templateData = {
-    name: invitation.name,
-    eventTitle: invitation.title,
-    eventDate: new Date(invitation.startDate).toLocaleString("pt-BR", {
-      dateStyle: "long",
-      timeStyle: "short",
-    }),
-    location: invitation.location,
-    eventType: invitation.eventType,
-    invitationUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}`,
-    buttonColor: invitation.color,
-  };
-
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: email,
     subject: "Seu convite está pronto! ",
-    html: template(templateData),
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #333;">Seu convite está pronto!</h1>
+        <p>Olá! Seu convite para "${invitation.title}" foi criado com sucesso.</p>
+        <div style="margin: 20px 0;">
+          <img src="${image}" alt="Convite" style="max-width: 100%; height: auto;" />
+        </div>
+        <p>Você pode visualizar e compartilhar seu convite através do link:</p>
+        <a href="${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}" style="color: #0070f3; text-decoration: none;">
+          ${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}
+        </a>
+      </div>
+    `,
     attachments: [
       {
         filename: "convite.pdf",
-        content: Buffer.from(pdf),
+        content: pdf,
         contentType: "application/pdf",
-      },
-      {
-        filename: "convite.png",
-        content: Buffer.from(image),
-        contentType: "image/png",
       },
     ],
   };
 
   await transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.error('Erro ao enviar e-mail:', error);
+      console.error("Erro ao enviar e-mail:", error);
     } else {
-      console.log('E-mail enviado com sucesso:', info.response);
+      console.log("E-mail enviado com sucesso:", info.response);
     }
-  })
+  });
 }
