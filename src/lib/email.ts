@@ -31,7 +31,7 @@ export async function generateInvitationImage(
     date: invitation.startDate.toLocaleDateString("pt-BR"),
     location: invitation.location,
     description: invitation.description,
-    themeImage: invitation.themeImage ?? "",
+    themeImage: invitation.themeImage ? `${process.env.NEXT_PUBLIC_BASE_URL}${invitation.themeImage}` : "",
     color: invitation.color,
   });
 
