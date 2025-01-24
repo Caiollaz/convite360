@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Invitation {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Dados básicos do evento
+  title       String
+  startDate   DateTime
+  eventType   String
+  location    String
+  description String
+  
+  // Dados do organizador
+  name        String
+  email       String
+  phone       String
+  
+  // Dados do tema
+  color       String   @default("#000000")
+  themeId     String?
+  themeName   String?
+  themeImage  String?
+  
+  // Status do pagamento
+  isPaid      Boolean  @default(false)
+  paidAt      DateTime?
+  
+  // Termos e condições
+  terms       Boolean  @default(false)
+}
