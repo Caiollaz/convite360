@@ -48,7 +48,7 @@ export async function generateInvitationImage(
   return imageUrl;
 }
 
-export async function generatePDFAndImage(invitationId: string) {
+export async function generatePNGAndImage(invitationId: string) {
   const invitation = await prisma.invitation.findUnique({
     where: { id: invitationId },
   });
@@ -80,7 +80,7 @@ export async function generatePDFAndImage(invitationId: string) {
 
   const html = template(templateData);
 
-  const pdf = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pdf`, {
+  const png = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/png`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -88,13 +88,13 @@ export async function generatePDFAndImage(invitationId: string) {
     body: JSON.stringify({ html }),
   });
 
-  if (!pdf.ok) {
-    throw new Error("Failed to generate PDF");
+  if (!png.ok) {
+    throw new Error("Failed to generate PNG");
   }
 
-  const pdfBuffer = await pdf.arrayBuffer();
+  const pngBuffer = await png.arrayBuffer();
 
-  return { pdf: Buffer.from(pdfBuffer), image: imageUrl };
+  return { png: Buffer.from(pngBuffer), image: imageUrl };
 }
 
 export async function sendConfirmationEmail(
@@ -109,7 +109,7 @@ export async function sendConfirmationEmail(
     throw new Error("Invitation not found");
   }
 
-  const { pdf, image } = await generatePDFAndImage(invitationId);
+  const { png, image } = await generatePNGAndImage(invitationId);
 
   const mailOptions = {
     from: process.env.EMAIL_FROM,
@@ -130,9 +130,9 @@ export async function sendConfirmationEmail(
     `,
     attachments: [
       {
-        filename: "convite.pdf",
-        content: pdf,
-        contentType: "application/pdf",
+        filename: "convite.png",
+        content: png,
+        contentType: "image/png",
       },
     ],
   };
