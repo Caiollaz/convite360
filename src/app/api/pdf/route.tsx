@@ -137,10 +137,20 @@ export async function POST(request: Request) {
       {
         width: 800,
         height: 1131,
+        headers: {
+          "content-type": "image/png",
+          "cache-control": "public, max-age=0, must-revalidate",
+        },
       }
     );
 
-    return image;
+    const buffer = await image.arrayBuffer();
+    return new Response(buffer, {
+      headers: {
+        "content-type": "image/png",
+        "cache-control": "public, max-age=0, must-revalidate",
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to generate PDF" },

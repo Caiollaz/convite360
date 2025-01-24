@@ -76,13 +76,13 @@ export async function generatePNGAndImage(invitationId: string) {
     }),
     location: invitation.location,
     eventType: invitation.eventType,
-    invitationUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}`,
+    invitationUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}/preview`,
     buttonColor: invitation.color,
   };
 
   const html = template(templateData);
 
-  const png = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pdf`, {
+  const pngResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pdf`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -100,13 +100,14 @@ export async function generatePNGAndImage(invitationId: string) {
     }),
   });
 
-  if (!png.ok) {
+  if (!pngResponse.ok) {
     throw new Error("Failed to generate PNG");
   }
 
-  const pngBuffer = await png.arrayBuffer();
+  const pngArrayBuffer = await pngResponse.arrayBuffer();
+  const pngBuffer = Buffer.from(pngArrayBuffer);
 
-  return { png: Buffer.from(pngBuffer), image: imageUrl };
+  return { png: pngBuffer, image: imageUrl };
 }
 
 export async function sendConfirmationEmail(
@@ -149,7 +150,7 @@ export async function sendConfirmationEmail(
                     Prévia do seu convite
                   </p>
                   <div style="text-align: center;">
-                    <img src="${image}" alt="Convite" style="max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);" />
+                    <img src="cid:convite" alt="Convite" style="max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);" />
                   </div>
                 </div>
                 <div style="text-align: center; margin-bottom: 35px;">
@@ -176,6 +177,7 @@ export async function sendConfirmationEmail(
           filename: "convite.png",
           content: png,
           contentType: "image/png",
+          cid: "convite"
         },
       ],
     };
