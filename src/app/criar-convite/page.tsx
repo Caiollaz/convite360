@@ -12,11 +12,13 @@ import useMercadoPago from "@/hooks/useMercadoPago";
 import { colors } from "@/interfaces/colors";
 import { FormData, formSchema } from "@/interfaces/schema";
 import { themes } from "@/interfaces/themes";
+import { prisma } from "@/lib/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar, MapPinned, Maximize2, Ticket, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 
 export default function InvitationForm() {
@@ -81,14 +83,35 @@ export default function InvitationForm() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      const invitationId = uuidv4();
+
+      const invitation = await prisma.invitation.create({
+        data: {
+          id: invitationId,
+          title: data.title,
+          startDate: new Date(data.startDate),
+          eventType: data.eventType,
+          location: data.location,
+          description: data.description,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          terms: data.terms,
+          color: formData.color,
+          themeId: selectedTheme.id,
+          themeName: selectedTheme.name,
+          themeImage: selectedTheme.image,
+        },
+      });
+
       await createMercadoPagoCheckout({
-        id: uuidv4(),
+        id: invitationId,
         email: data.email,
         name: data.name,
         phoneNumber: data.phone,
       });
     } catch (error) {
-      console.error("Erro ao processar pagamento:", error);
+      toast.error("Erro ao criar convite. Por favor, tente novamente.");
     }
   };
 
@@ -469,7 +492,7 @@ export default function InvitationForm() {
       )}
 
       <footer className="w-full p-6 text-center text-sm text-muted-foreground relative z-10 border-t border-border">
-        © 2024 Convite360. Todos os direitos reservados.
+        2024 Convite360. Todos os direitos reservados.
       </footer>
     </div>
   );
