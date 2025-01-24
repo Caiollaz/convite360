@@ -80,7 +80,7 @@ export async function generatePNGAndImage(invitationId: string) {
 
   const html = template(templateData);
 
-  const png = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/png`, {
+  const png = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pdf`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
