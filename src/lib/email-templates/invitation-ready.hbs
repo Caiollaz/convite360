@@ -1,88 +1,94 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Seu convite está pronto!</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f9;
-        font-family: "Helvetica Neue", Arial, sans-serif;
-      }
-      .container {
-        max-width: 600px;
-        margin: 40px auto;
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      }
-      .header-bar {
-        height: 8px;
-        background: linear-gradient(90deg, #6c63ff, #8e44ad);
-      }
-      .content {
-        padding: 40px 30px;
-        text-align: center;
-      }
-      h1 {
-        color: #333;
-        font-size: 26px;
-        margin-bottom: 20px;
-        font-weight: bold;
-      }
-      p {
-        color: #555;
-        font-size: 16px;
-        line-height: 1.6;
-        margin: 0 0 25px 0;
-      }
-      .button {
-        display: inline-block;
-        background: linear-gradient(90deg, #6c63ff, #8e44ad);
-        color: white;
-        text-decoration: none;
-        padding: 14px 30px;
-        border-radius: 25px;
-        font-size: 16px;
-        font-weight: bold;
-        box-shadow: 0 4px 8px rgba(108, 99, 255, 0.4);
-        transition: all 0.3s ease;
-      }
-      .button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(108, 99, 255, 0.5);
-      }
-      .footer {
-        margin-top: 40px;
-        padding-top: 20px;
-        border-top: 1px solid #eee;
-        color: #888;
-        font-size: 14px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header-bar"></div>
-      <div class="content">
-        <h1>✨ Seu convite está pronto!</h1>
-        <p>
-          Olá! Seu convite para <strong style="color: #8e44ad;">{{eventTitle}}</strong> foi criado com sucesso.  
-        </p>
-        <p>Visualize e compartilhe seu convite através do link:</p>
-        <a
-          href="{{invitationUrl}}"
-          class="button"
-        >
-          Ver meu convite
-        </a>
-        <div class="footer">
-          <p>Este é um email automático, por favor não responda.</p>
-        </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seu convite está pronto!</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .primary-text {
+      color: #8e44ad;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-bar {
+      height: 8px;
+      background: linear-gradient(90deg, #6c63ff, #8e44ad);
+    }
+
+    .content {
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 26px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    p {
+      color: #555;
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0 0 25px 0;
+    }
+
+    .button {
+      display: inline-block;
+      background: linear-gradient(90deg, #6c63ff, #8e44ad);
+      color: white !important;
+      text-decoration: none;
+      padding: 14px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(108, 99, 255, 0.4);
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      color: #888;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header-bar"></div>
+    <div class="content">
+      <h1>✨ Seu convite está pronto!</h1>
+      <p>
+        Olá! Seu convite para <strong class="primary-text">{{eventTitle}}</strong> foi criado com sucesso.
+      </p>
+      <p>Visualize e compartilhe seu convite através do link:</p>
+      <a href="{{invitationUrl}}" class="button">
+        Ver meu convite
+      </a>
+      <div class="footer">
+        <p>Este é um email automático, por favor não responda.</p>
       </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
