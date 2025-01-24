@@ -85,7 +85,17 @@ export async function generatePNGAndImage(invitationId: string) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ html }),
+    body: JSON.stringify({
+      name: invitation.name,
+      eventTitle: invitation.title,
+      eventDate: new Date(invitation.startDate).toLocaleString("pt-BR", {
+        dateStyle: "long",
+        timeStyle: "short",
+      }),
+      location: invitation.location,
+      eventType: invitation.eventType,
+      buttonColor: invitation.color,
+    }),
   });
 
   if (!png.ok) {
