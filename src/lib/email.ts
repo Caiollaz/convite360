@@ -9,6 +9,7 @@ import { prisma } from "./prisma";
 const transporter = createTransport({
   host: process.env.EMAIL_HOST,
   port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -24,7 +25,11 @@ export async function generatePDFAndImage(invitationId: string) {
     throw new Error("Invitation not found");
   }
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+  });
+  
   const page = await browser.newPage();
   
   await page.goto(`${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}/preview`, {
