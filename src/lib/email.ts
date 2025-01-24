@@ -31,7 +31,9 @@ export async function generateInvitationImage(
     date: invitation.startDate.toLocaleDateString("pt-BR"),
     location: invitation.location,
     description: invitation.description,
-    themeImage: invitation.themeImage ? `${process.env.NEXT_PUBLIC_BASE_URL}${invitation.themeImage}` : "",
+    themeImage: invitation.themeImage
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}${invitation.themeImage}`
+      : "",
     color: invitation.color,
   });
 
@@ -111,47 +113,76 @@ export async function sendConfirmationEmail(
   email: string,
   invitationId: string
 ) {
-  const invitation = await prisma.invitation.findUnique({
-    where: { id: invitationId },
-  });
+  try {
+    console.log(
+      `Starting email send process for invitation ${invitationId} to ${email}`
+    );
 
-  if (!invitation) {
-    throw new Error("Invitation not found");
-  }
+    const invitation = await prisma.invitation.findUnique({
+      where: { id: invitationId },
+    });
 
-  const { png, image } = await generatePNGAndImage(invitationId);
-
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
-    to: email,
-    subject: "Seu convite está pronto! ",
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #333;">Seu convite está pronto!</h1>
-        <p>Olá! Seu convite para "${invitation.title}" foi criado com sucesso.</p>
-        <div style="margin: 20px 0;">
-          <img src="${image}" alt="Convite" style="max-width: 100%; height: auto;" />
-        </div>
-        <p>Você pode visualizar e compartilhar seu convite através do link:</p>
-        <a href="${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}" style="color: #0070f3; text-decoration: none;">
-          ${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}
-        </a>
-      </div>
-    `,
-    attachments: [
-      {
-        filename: "convite.png",
-        content: png,
-        contentType: "image/png",
-      },
-    ],
-  };
-
-  await transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Erro ao enviar e-mail:", error);
-    } else {
-      console.log("E-mail enviado com sucesso:", info.response);
+    if (!invitation) {
+      throw new Error("Invitation not found");
     }
-  });
+
+    console.log("Generating PNG and image...");
+    const { png, image } = await generatePNGAndImage(invitationId);
+    console.log("PNG and image generated successfully");
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: "Seu convite está pronto! ",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #333;">Seu convite está pronto!</h1>
+          <p>Olá! Seu convite para "${invitation.title}" foi criado com sucesso.</p>
+          <div style="margin: 20px 0;">
+            <img src="${image}" alt="Convite" style="max-width: 100%; height: auto;" />
+          </div>
+          <p>Você pode visualizar e compartilhar seu convite através do link:</p>
+          <a href="${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}" style="color: #0070f3; text-decoration: none;">
+            ${process.env.NEXT_PUBLIC_BASE_URL}/convites/${invitationId}
+          </a>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: "convite.png",
+          content: png,
+          contentType: "image/png",
+        },
+      ],
+    };
+
+    console.log("Sending email...");
+    console.log("Using SMTP settings:", {
+      host: process.env.EMAIL_HOST,
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+      },
+    });
+
+    // Use promise-based sendMail
+    const info = await new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email:", error);
+          reject(error);
+        } else {
+          console.log("Email sent successfully:", info.response);
+          resolve(info);
+        }
+      });
+    });
+
+    console.log("Email sent successfully");
+    return info;
+  } catch (error) {
+    console.error("Error in sendConfirmationEmail:", error);
+    throw error;
+  }
 }
