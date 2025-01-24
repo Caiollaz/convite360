@@ -26,8 +26,16 @@ export async function generatePDFAndImage(invitationId: string) {
   }
 
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--single-process'
+    ],
     headless: true,
+    executablePath: process.env.NODE_ENV === 'production'
+      ? '/usr/bin/chromium'  // Path do Chrome na Vercel
+      : puppeteer.executablePath(), // Use local Chrome in development
   });
   
   const page = await browser.newPage();

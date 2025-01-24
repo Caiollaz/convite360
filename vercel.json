@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npx puppeteer browsers install chrome && prisma generate && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs"
+}
