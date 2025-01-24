@@ -7,37 +7,51 @@ export async function POST(request: Request) {
   try {
     const { name, eventTitle, eventDate, location, eventType, buttonColor } = await request.json();
 
-    // Generate image using proper JSX
     const image = await new ImageResponse(
       <div
         style={{
           width: "800px",
-          height: "1131px", // A4 proportion
+          height: "1131px",
           padding: "40px",
           backgroundColor: "white",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          textAlign: "center",
-          fontFamily: "sans-serif",
+          gap: "16px",
         }}
       >
-        <h1 style={{ fontSize: "48px", color: buttonColor, marginBottom: "24px" }}>
-          {eventTitle}
-        </h1>
-        <div style={{ fontSize: "24px", color: "#666", marginBottom: "16px" }}>
-          {eventDate}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <h1
+            style={{
+              fontSize: "48px",
+              color: buttonColor,
+              margin: "0",
+              textAlign: "center",
+            }}
+          >
+            {eventTitle}
+          </h1>
+          <p style={{ fontSize: "24px", color: "#666", margin: "0" }}>
+            {eventDate}
+          </p>
+          <p style={{ fontSize: "20px", color: "#666", margin: "0" }}>
+            {location}
+          </p>
+          <p style={{ fontSize: "18px", color: "#666", margin: "0" }}>
+            {eventType}
+          </p>
         </div>
-        <div style={{ fontSize: "20px", color: "#666", marginBottom: "24px" }}>
-          {location}
-        </div>
-        <div style={{ fontSize: "18px", color: "#666", marginBottom: "32px" }}>
-          {eventType}
-        </div>
-        <div style={{ fontSize: "16px", color: "#666" }}>
+        <p style={{ fontSize: "16px", color: "#666", margin: "0" }}>
           Convite para: {name}
-        </div>
+        </p>
       </div>,
       {
         width: 800,
@@ -45,7 +59,6 @@ export async function POST(request: Request) {
       }
     );
 
-    // Return the image as a response
     return image;
   } catch (error) {
     console.error("Error generating PDF:", error);
