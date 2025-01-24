@@ -12,7 +12,7 @@ import useMercadoPago from "@/hooks/useMercadoPago";
 import { colors } from "@/interfaces/colors";
 import { FormData, formSchema } from "@/interfaces/schema";
 import { themes } from "@/interfaces/themes";
-import { prisma } from "@/lib/prisma";
+import { createInvitation } from "./actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar, MapPinned, Maximize2, Ticket, X } from "lucide-react";
 import Link from "next/link";
@@ -85,23 +85,13 @@ export default function InvitationForm() {
     try {
       const invitationId = uuidv4();
 
-      const invitation = await prisma.invitation.create({
-        data: {
-          id: invitationId,
-          title: data.title,
-          startDate: new Date(data.startDate),
-          eventType: data.eventType,
-          location: data.location,
-          description: data.description,
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          terms: data.terms,
-          color: formData.color,
-          themeId: selectedTheme.id,
-          themeName: selectedTheme.name,
-          themeImage: selectedTheme.image,
-        },
+      await createInvitation({
+        ...data,
+        invitationId,
+        color: formData.color,
+        themeId: selectedTheme.id,
+        themeName: selectedTheme.name,
+        themeImage: selectedTheme.image,
       });
 
       await createMercadoPagoCheckout({
@@ -111,6 +101,7 @@ export default function InvitationForm() {
         phoneNumber: data.phone,
       });
     } catch (error) {
+      console.error(error);
       toast.error("Erro ao criar convite. Por favor, tente novamente.");
     }
   };
